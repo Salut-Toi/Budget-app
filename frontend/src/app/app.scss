@@ -1,0 +1,4 @@
+.nav { display:flex; gap:1rem; padding:1rem; background:#f6f6f6; }
+.nav a { text-decoration:none; color:#333; }
+.nav a.active { font-weight:700; }
+.container { max-width: 980px; margin: 0 auto; padding: 1rem; }
