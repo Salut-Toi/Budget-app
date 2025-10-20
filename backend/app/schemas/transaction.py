@@ -1,20 +1,32 @@
-from pydantic import BaseModel, Field
 from datetime import date
+from typing import Optional
+from pydantic import BaseModel
 
+
+# Base commune à toutes les transactions
 class TransactionBase(BaseModel):
     date: date
-    label: str = Field(max_length=200)
+    label: str
     amount: float
-    category_id: int | None = None
+    category_id: int
 
-class TransactionCreate(TransactionBase): pass
 
+# Modèle pour la création d'une transaction
+class TransactionCreate(TransactionBase):
+    pass
+
+
+# Modèle pour la mise à jour (tous les champs optionnels)
 class TransactionUpdate(BaseModel):
-    date: date | None = None
-    label: str | None = None
-    amount: float | None = None
-    category_id: int | None = None
+    date: Optional[date] = None
+    label: Optional[str] = None
+    amount: Optional[float] = None
+    category_id: Optional[int] = None
 
+
+# Modèle pour la réponse / affichage
 class TransactionOut(TransactionBase):
     id: int
-    category_name: str | None = None
+
+    class Config:
+        orm_mode = True
