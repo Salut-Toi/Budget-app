@@ -2,33 +2,40 @@ from __future__ import annotations
 
 import json
 from typing import List, Any
-
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    # Pydantic v2 config
+    """
+    Configuration principale de l'application FastAPI.
+    Compatible Pydantic v2 et .env.
+    """
+    # Configuration de Pydantic Settings
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
 
+    # --- Informations générales ---
     PROJECT_NAME: str = "Budget API"
     API_V1: str = "/api/v1"
 
-    # SQLite par défaut ; surcharge possible via .env
-    # Exemple .env : SQLALCHEMY_DATABASE_URI=sqlite:///./budget.db
-    SQLALCHEMY_DATABASE_URI: str = "sqlite:///./budget.db"
+    # --- Base de données ---
+    # SQLite par défaut (modifiable dans .env)
+    DATABASE_URL: str = "sqlite:///./budget.db"
 
-    # CORS : accepte soit un JSON '["http://x","http://y"]', soit "http://x,http://y"
+    # --- CORS ---
+    # Accepte soit un JSON ["http://x","http://y"], soit "http://x,http://y"
     CORS_ORIGINS: List[str] = ["http://localhost:4200", "http://127.0.0.1:4200"]
 
-    # JWT
-    JWT_SECRET: str = "change-me"
+    # --- JWT ---
+    JWT_SECRET: str = "dev-secret"
     JWT_ALG: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 jours
 
-    # Admin seed
+    # --- Compte administrateur par défaut ---
     ADMIN_USER: str = "admin"
-    ADMIN_PASS: str = "admin"  # ⚠️ sera validé (<= 72 octets pour bcrypt)
+    ADMIN_PASS: str = "admin123"  # <= Doit faire moins de 72 octets pour bcrypt
+
+    # --- VALIDATEURS ---
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
@@ -63,8 +70,12 @@ class Settings(BaseSettings):
         On valide ici pour donner un message clair au démarrage.
         """
         if len(v.encode("utf-8")) > 72:
-            raise ValueError("ADMIN_PASS dépasse 72 octets (limite bcrypt) — raccourcis-le dans ton .env.")
+            raise ValueError(
+                "ADMIN_PASS dépasse 72 octets (limite bcrypt). "
+                "Raccourcis-le dans ton fichier .env."
+            )
         return v
 
 
+# Instance globale des settings
 settings = Settings()
